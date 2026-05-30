@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Predictor de Vuelo — SEIC</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg:      #090d16;
+            --surface: #0f1422;
+            --card:    #151d30;
+            --border:  #1e2a45;
+            --primary: #3b82f6;
+            --primary-glow: rgba(59,130,246,.35);
+            --success: #10b981;
+            --danger:  #f43f5e;
+            --text:    #f3f4f6;
+            --muted:   #6b7280;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* ── TOP NAV ── */
+        .topnav {
+            background: var(--surface);
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: .9rem 2rem;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        .topnav .brand {
+            font-weight: 700;
+            font-size: 1.1rem;
+            background: linear-gradient(to right, #3b82f6, #ec4899);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-decoration: none;
+        }
+        .nav-links { display: flex; gap: 8px; }
+        .nav-links a {
+            text-decoration: none;
+            padding: .5rem 1rem;
+            border-radius: 8px;
+            font-size: .875rem;
+            font-weight: 500;
+            color: var(--muted);
+            transition: all .2s;
+        }
+        .nav-links a:hover { color: #fff; background: rgba(255,255,255,.04); }
+        .nav-links a.active {
+            color: #fff;
+            background: rgba(59,130,246,.12);
+            border: 1px solid rgba(59,130,246,.3);
+        }
+
+        /* ── MAIN ── */
+        main {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 3rem 1.5rem;
+        }
+        .card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 2.5rem;
+            width: 100%;
+            max-width: 540px;
+            box-shadow: 0 20px 40px rgba(0,0,0,.5);
+        }
+        .card-title {
+            font-size: 1.6rem;
+            font-weight: 700;
+            margin-bottom: .4rem;
+        }
+        .card-desc {
+            font-size: .875rem;
+            color: var(--muted);
+            margin-bottom: 2rem;
+        }
+
+        /* ── FORM ── */
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.2rem;
+            margin-bottom: 1.5rem;
+        }
+        .form-group { display: flex; flex-direction: column; gap: 6px; }
+        .form-group.full { grid-column: 1 / -1; }
+        label { font-size: .8rem; font-weight: 500; color: var(--muted); }
+        select, input[type="number"] {
+            width: 100%;
+            padding: .75rem 1rem;
+            border-radius: 10px;
+            border: 1px solid var(--border);
+            background: var(--bg);
+            color: #fff;
+            font-size: .9rem;
+            font-family: inherit;
+            outline: none;
+            transition: border-color .2s, box-shadow .2s;
+        }
+        select:focus, input:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px var(--primary-glow);
+        }
+
+        /* ── BUTTON ── */
+        .btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            width: 100%;
+            padding: .9rem;
+            border-radius: 12px;
+            border: none;
+            font-family: inherit;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            background: var(--primary);
+            color: #fff;
+            box-shadow: 0 4px 16px rgba(59,130,246,.25);
+            transition: all .2s;
+        }
+        .btn:hover  { background: #2563eb; transform: translateY(-2px); box-shadow: 0 8px 22px rgba(59,130,246,.4); }
+        .btn:active { transform: translateY(1px); }
+        .btn:disabled { opacity: .5; cursor: not-allowed; transform: none; }
+
+        /* ── RESULT ── */
+        .result {
+            margin-top: 1.75rem;
+            padding: 1.5rem;
+            border-radius: 14px;
+            display: none;
+            animation: fadeUp .3s ease;
+        }
+        @keyframes fadeUp { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:none; } }
+        .result.survive     { background: rgba(16,185,129,.06); border: 1px solid var(--success); }
+        .result.not-survive { background: rgba(244,63,94,.06);  border: 1px solid var(--danger); }
+        .result-label { font-size: .875rem; font-weight: 500; color: var(--muted); margin-bottom: .3rem; }
+        .result-value { font-size: 1.9rem; font-weight: 800; }
+        .result-sub   { font-size: .875rem; margin-top: .4rem; }
+
+        /* ── LOADER ── */
+        .dots { display: inline-flex; gap: 4px; }
+        .dots span {
+            width: 7px; height: 7px;
+            background: #fff; border-radius: 50%;
+            animation: bounce .55s infinite alternate;
+        }
+        .dots span:nth-child(2) { animation-delay: .18s; }
+        .dots span:nth-child(3) { animation-delay: .36s; }
+        @keyframes bounce { to { transform: translateY(-7px); } }
+    </style>
+</head>
+<body>
+
+<nav class="topnav">
+    <a href="/" class="brand">✈️ SEIC &amp; IA</a>
+    <div class="nav-links">
+        <a href="/aereo/" class="active">✈️ Predictor Aéreo</a>
+        <a href="/enfermedad/diagnosticar/">🩺 Diagnosticar</a>
+        <a href="/enfermedad/configurar/">⚙️ Configurar Sistema</a>
+        <a href="/tb_detector/">🫁 TBC (CNN)</a>
+        <a href="/tb_detector/arbol">🌳 TBC (Árbol)</a>
+        <a href="/titanic_ad/">🚢 Titanic AD</a>
+    </div>
+</nav>
+
+<main>
+    <div class="card">
+        <div class="card-title">✈️ Predictor de Vuelo</div>
+        <div class="card-desc">Red neuronal profunda entrenada para estimar la probabilidad de supervivencia en accidentes aéreos.</div>
+
+        <form id="form">
+            <div class="form-grid">
+                <div class="form-group">
+                    <label for="sex">Género del pasajero</label>
+                    <select id="sex">
+                        <option value="male">Masculino</option>
+                        <option value="female">Femenino</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="age">Edad (años)</label>
+                    <input type="number" id="age" min="0" max="120" value="28">
+                </div>
+                <div class="form-group">
+                    <label for="class">Clase de asiento</label>
+                    <select id="class">
+                        <option value="First">Primera clase</option>
+                        <option value="Second">Ejecutiva</option>
+                        <option value="Third" selected>Económica</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="deck">Sección de cabina</label>
+                    <select id="deck">
+                        <option value="unknown" selected>Desconocida</option>
+                        <option value="A">Sección A</option>
+                        <option value="B">Sección B</option>
+                        <option value="C">Sección C</option>
+                        <option value="D">Sección D</option>
+                        <option value="E">Sección E</option>
+                        <option value="F">Sección F</option>
+                        <option value="G">Sección G</option>
+                    </select>
+                </div>
+                <div class="form-group full">
+                    <label for="fare">Tarifa del pasaje (USD)</label>
+                    <input type="number" id="fare" min="0" step="0.01" value="30.00">
+                </div>
+            </div>
+
+            <button type="submit" class="btn" id="btn">
+                <span id="btn-text">Calcular Probabilidad</span>
+                <span class="dots" id="loader" style="display:none;"><span></span><span></span><span></span></span>
+            </button>
+        </form>
+
+        <div class="result" id="result">
+            <div class="result-label" id="res-label"></div>
+            <div class="result-value" id="res-value"></div>
+            <div class="result-sub" id="res-sub"></div>
+        </div>
+    </div>
+</main>
+
+<script>
+document.getElementById('form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const btn     = document.getElementById('btn');
+    const btnText = document.getElementById('btn-text');
+    const loader  = document.getElementById('loader');
+    const result  = document.getElementById('result');
+
+    btnText.style.display = 'none';
+    loader.style.display  = 'inline-flex';
+    btn.disabled = true;
+    result.style.display = 'none';
+
+    try {
+        const res  = await fetch('/aereo/predict', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                sex:   document.getElementById('sex').value,
+                age:   parseFloat(document.getElementById('age').value),
+                class: document.getElementById('class').value,
+                deck:  document.getElementById('deck').value,
+                fare:  parseFloat(document.getElementById('fare').value),
+            })
+        });
+        const data = await res.json();
+
+        if (data.status === 'success') {
+            const survive = data.estado === 'SOBREVIVE';
+            result.className = 'result ' + (survive ? 'survive' : 'not-survive');
+            document.getElementById('res-label').textContent = survive
+                ? '🟢 Pronóstico del motor de IA:'
+                : '🔴 Pronóstico del motor de IA:';
+            document.getElementById('res-value').textContent = data.estado;
+            const pct = (data.probabilidad * 100).toFixed(2);
+            document.getElementById('res-sub').textContent = `Probabilidad de supervivencia: ${pct}%`;
+            document.getElementById('res-value').style.color = survive ? 'var(--success)' : 'var(--danger)';
+            result.style.display = 'block';
+        } else {
+            alert('Error: ' + data.message);
+        }
+    } catch (err) {
+        alert('Error de conexión con el servidor.');
+    } finally {
+        btnText.style.display = 'inline';
+        loader.style.display  = 'none';
+        btn.disabled = false;
+    }
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,736 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Detector de Tuberculosis — SEIC</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg:      #090d16;
+            --surface: #0f1422;
+            --card:    #151d30;
+            --border:  #1e2a45;
+            --accent:  #f43f5e;
+            --accent-glow: rgba(244,63,94,.35);
+            --primary: #3b82f6;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --text:    #f3f4f6;
+            --muted:   #6b7280;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* ── TOP NAV ── */
+        .topnav {
+            background: var(--surface);
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: .9rem 2rem;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        .topnav .brand {
+            font-weight: 700;
+            font-size: 1.1rem;
+            background: linear-gradient(to right, #3b82f6, #ec4899);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-decoration: none;
+        }
+        .nav-links { display: flex; gap: 8px; }
+        .nav-links a {
+            text-decoration: none;
+            padding: .5rem 1rem;
+            border-radius: 8px;
+            font-size: .875rem;
+            font-weight: 500;
+            color: var(--muted);
+            transition: all .2s;
+        }
+        .nav-links a:hover { color: #fff; background: rgba(255,255,255,.04); }
+        .nav-links a.active {
+            color: #fff;
+            background: rgba(244,63,94,0.12);
+            border: 1px solid rgba(244,63,94,0.3);
+        }
+
+        /* ── MAIN ── */
+        main {
+            flex: 1;
+            max-width: 1100px;
+            width: 100%;
+            margin: 0 auto;
+            padding: 2.5rem 1.5rem;
+        }
+        h1 {
+            font-size: 1.75rem;
+            font-weight: 700;
+            margin-bottom: .4rem;
+        }
+        .subtitle {
+            font-size: .875rem;
+            color: var(--muted);
+            margin-bottom: 2rem;
+        }
+
+        .layout-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 2rem;
+        }
+        @media(min-width: 850px) {
+            .layout-grid {
+                grid-template-columns: 430px 1fr;
+            }
+        }
+
+        /* ── PANEL / CARDS ── */
+        .card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 18px;
+            padding: 2rem;
+            height: fit-content;
+            box-shadow: 0 10px 30px rgba(0,0,0,.4);
+        }
+        .card-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: .5rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        /* ── DRAG DROP AREA ── */
+        .upload-area {
+            border: 2px dashed var(--border);
+            border-radius: 12px;
+            padding: 2.5rem 1.5rem;
+            text-align: center;
+            cursor: pointer;
+            background: rgba(255,255,255,.01);
+            transition: all .2s;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 1.5rem;
+            position: relative;
+            overflow: hidden;
+        }
+        .upload-area:hover, .upload-area.dragover {
+            border-color: var(--accent);
+            background: rgba(244,63,94,0.03);
+        }
+        .upload-icon {
+            font-size: 2.5rem;
+            line-height: 1;
+        }
+        .upload-text {
+            font-size: .85rem;
+            font-weight: 500;
+        }
+        .upload-sub {
+            font-size: .75rem;
+            color: var(--muted);
+        }
+
+        /* Preview original de la imagen subida */
+        .preview-wrapper {
+            position: relative;
+            display: none;
+            margin-bottom: 1.5rem;
+        }
+        .preview-original {
+            width: 100%;
+            height: 180px;
+            object-fit: cover;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            display: block;
+        }
+        .change-img-btn {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            background: rgba(15,20,34,0.82);
+            border: 1px solid var(--border);
+            color: var(--text);
+            font-family: inherit;
+            font-size: .72rem;
+            font-weight: 600;
+            padding: .3rem .75rem;
+            border-radius: 8px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            backdrop-filter: blur(4px);
+            transition: all .2s;
+        }
+        .change-img-btn:hover {
+            background: rgba(244,63,94,0.18);
+            border-color: var(--accent);
+            color: var(--accent);
+        }
+
+        /* ── CONTROLLER / SLIDER ── */
+        .control-group {
+            margin-bottom: 1.5rem;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+        .control-header {
+            display: flex;
+            justify-content: space-between;
+            font-size: .78rem;
+            font-weight: 500;
+            color: var(--muted);
+        }
+        input[type="range"] {
+            width: 100%;
+            accent-color: var(--accent);
+            cursor: pointer;
+            margin: 6px 0;
+        }
+
+        /* ── BUTTON ── */
+        .btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            width: 100%;
+            padding: .9rem;
+            border-radius: 12px;
+            border: none;
+            font-family: inherit;
+            font-size: .95rem;
+            font-weight: 600;
+            cursor: pointer;
+            background: var(--accent);
+            color: #fff;
+            box-shadow: 0 4px 16px var(--accent-glow);
+            transition: all .2s;
+        }
+        .btn:hover:not(:disabled)  { background: #e11d48; transform: translateY(-2px); box-shadow: 0 8px 22px var(--accent-glow); }
+        .btn:active:not(:disabled) { transform: translateY(1px); }
+        .btn:disabled { opacity: .45; cursor: not-allowed; }
+
+        /* ── RESULTS LAYOUT ── */
+        .results-panel {
+            display: none;
+            animation: fadeUp .35s cubic-bezier(.16,1,.3,1);
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+        @keyframes fadeUp { from { opacity:0; transform:translateY(12px); } to { opacity:1; transform:none; } }
+
+        /* ── DOWNLOAD BUTTON ── */
+        .btn-download {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: .45rem 1rem;
+            border-radius: 8px;
+            border: 1px solid rgba(59,130,246,.35);
+            background: rgba(59,130,246,.08);
+            color: var(--primary);
+            font-family: inherit;
+            font-size: .78rem;
+            font-weight: 600;
+            cursor: pointer;
+            text-decoration: none;
+            transition: all .2s;
+        }
+        .btn-download:hover {
+            background: rgba(59,130,246,.18);
+            border-color: var(--primary);
+            transform: translateY(-1px);
+        }
+        .tabs-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 1rem;
+            border-bottom: 1px solid var(--border);
+        }
+        .tabs-row .tabs {
+            border-bottom: none;
+            margin-bottom: 0;
+            padding-bottom: 0;
+        }
+
+        /* Tabs para visualizador */
+        .tabs {
+            display: flex;
+            gap: 6px;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 0;
+            margin-bottom: 1rem;
+        }
+        .tab-btn {
+            background: none;
+            border: none;
+            font-family: inherit;
+            font-size: .85rem;
+            font-weight: 500;
+            color: var(--muted);
+            padding: .6rem 1.2rem;
+            cursor: pointer;
+            border-bottom: 2px solid transparent;
+            transition: all .2s;
+        }
+        .tab-btn:hover { color: #fff; }
+        .tab-btn.active {
+            color: var(--accent);
+            border-bottom-color: var(--accent);
+            font-weight: 600;
+        }
+
+        .viewer-container {
+            position: relative;
+            background: #000;
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            aspect-ratio: 1 / 1;
+            width: 100%;
+        }
+        .viewer-img {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+            display: none;
+            animation: fadeIn .2s ease;
+        }
+        @keyframes fadeIn { from { opacity:0; } to { opacity:1; } }
+
+        /* ── REPORT / METRICS ── */
+        .report-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 1rem;
+        }
+        @media(min-width: 550px) {
+            .report-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+        .verdict-card {
+            background: rgba(255,255,255,.02);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 1.25rem;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+        .verdict-badge {
+            font-size: 1.2rem;
+            font-weight: 700;
+            margin-top: 4px;
+        }
+        .time-chip {
+            display: inline-flex;
+            align-items: center;
+            width: fit-content;
+            background: rgba(59,130,246,.08);
+            border: 1px solid rgba(59,130,246,.25);
+            color: var(--primary);
+            font-size: .72rem;
+            font-weight: 600;
+            padding: .25rem .75rem;
+            border-radius: 12px;
+            margin-top: auto;
+        }
+
+        /* Probabilidades por clase */
+        .prob-card {
+            background: rgba(255,255,255,.02);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 1.25rem;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        .class-row {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+        .class-header {
+            display: flex;
+            justify-content: space-between;
+            font-size: .8rem;
+            font-weight: 500;
+        }
+        .progress-bar-bg {
+            height: 8px;
+            background: var(--border);
+            border-radius: 4px;
+            overflow: hidden;
+        }
+        .progress-bar-fill {
+            height: 100%;
+            border-radius: 4px;
+            width: 0%;
+            transition: width .6s cubic-bezier(.16,1,.3,1);
+        }
+        .fill-tb     { background: var(--accent); }
+        .fill-sick   { background: var(--warning); }
+        .fill-health { background: var(--success); }
+
+        /* ── LOADER ── */
+        .dots { display: inline-flex; gap: 4px; }
+        .dots span {
+            width: 7px; height: 7px;
+            background: #fff; border-radius: 50%;
+            animation: bounce .55s infinite alternate;
+        }
+        .dots span:nth-child(2) { animation-delay: .18s; }
+        .dots span:nth-child(3) { animation-delay: .36s; }
+        @keyframes bounce { to { transform: translateY(-7px); } }
+    </style>
+</head>
+<body>
+
+<!-- NAVEGACIÓN -->
+<nav class="topnav">
+    <a href="/" class="brand">🏥 SEIC &amp; IA</a>
+    <div class="nav-links">
+        <a href="/aereo/">✈️ Predictor Aéreo</a>
+        <a href="/enfermedad/diagnosticar/">🩺 Diagnosticar</a>
+        <a href="/enfermedad/configurar/">⚙️ Configurar Sistema</a>
+        <a href="/tb_detector/" class="active">🫁 TBC (CNN)</a>
+        <a href="/tb_detector/arbol">🌳 TBC (Árbol)</a>
+        <a href="/titanic_ad/">🚢 Titanic AD</a>
+    </div>
+</nav>
+
+<!-- CONTENIDO PRINCIPAL -->
+<main>
+    <h1>🫁 Análisis Radiológico de Tuberculosis</h1>
+    <p class="subtitle">Sube una radiografía de tórax. La red neuronal Faster R-CNN analizará los pulmones para localizar lesiones sospechosas de TBC, generando bounding boxes y un mapa de calor Grad-CAM.</p>
+
+    <div class="layout-grid">
+        <!-- COLUMNA IZQUIERDA: CONTROLES DE SUBIDA -->
+        <div class="card">
+            <div class="card-title">🔬 Cargar Radiografía</div>
+            <p style="font-size: .8rem; color: var(--muted); margin-bottom: 1.5rem;">Carga una imagen JPEG o PNG de radiografía de tórax (X-ray) para iniciar el diagnóstico con visión artificial.</p>
+
+            <form id="form">
+                <!-- Drop Area -->
+                <div class="upload-area" id="drop-area" onclick="triggerFileInput()">
+                    <span class="upload-icon">📁</span>
+                    <span class="upload-text" id="upload-label">Arrastra tu radiografía aquí o haz clic</span>
+                    <span class="upload-sub">Formatos permitidos: PNG, JPG, JPEG</span>
+                    <input type="file" id="image-input" accept="image/*" style="display:none;" onchange="handleFileSelect(this)">
+                </div>
+
+                <!-- Preview Original -->
+                <div class="preview-wrapper" id="preview-wrapper">
+                    <img id="preview-orig" class="preview-original">
+                    <button type="button" class="change-img-btn" onclick="resetUpload()">🔄 Cambiar imagen</button>
+                </div>
+
+                <!-- Umbral de Inferencia -->
+                <div class="control-group">
+                    <div class="control-header">
+                        <span>Umbral de Confianza</span>
+                        <span id="thresh-val">0.35</span>
+                    </div>
+                    <input type="range" id="threshold" min="0.10" max="0.90" step="0.05" value="0.35" oninput="updateThreshLabel(this.value)">
+                </div>
+
+                <!-- Botón Ejecutar -->
+                <button type="submit" class="btn" id="btn-submit" disabled>
+                    <span id="btn-text">Iniciar Análisis Inteligente</span>
+                    <span class="dots" id="loader" style="display:none;"><span></span><span></span><span></span></span>
+                </button>
+            </form>
+        </div>
+
+        <!-- COLUMNA DERECHA: RESULTADOS (VISUALIZADOR Y METRICAS) -->
+        <div class="results-panel" id="results-panel">
+            <!-- PESTAÑAS DE VISUALIZACIÓN -->
+            <div class="card">
+                <div class="tabs-row">
+                    <div class="tabs">
+                        <button class="tab-btn active" id="tab-btn-boxes" onclick="switchTab('boxes')">🎯 Detección (Bounding Boxes)</button>
+                        <button class="tab-btn" id="tab-btn-gradcam" onclick="switchTab('gradcam')">🔥 Grad-CAM (Capa de Atención)</button>
+                    </div>
+                    <a id="btn-download-result" class="btn-download" download="resultado_tb.jpg" title="Descargar imagen activa">
+                        ⬇️ Descargar
+                    </a>
+                </div>
+
+                <div class="viewer-container">
+                    <img id="viewer-img-boxes" class="viewer-img" alt="Predicción Bounding Boxes">
+                    <img id="viewer-img-gradcam" class="viewer-img" alt="Predicción Grad-CAM">
+                </div>
+            </div>
+
+            <!-- REPORTE POR CLASE Y VEREDICTO -->
+            <div class="report-grid">
+                <!-- Veredicto Card -->
+                <div class="verdict-card">
+                    <span style="font-size: .8rem; font-weight: 500; color: var(--muted);">Resultado Principal</span>
+                    <div class="verdict-badge" id="verdict-badge">—</div>
+                    <div class="time-chip" id="time-chip">Inferencia en — ms</div>
+                </div>
+
+                <!-- Confianzas Card -->
+                <div class="prob-card">
+                    <!-- Clase: Tuberculosis -->
+                    <div class="class-row">
+                        <div class="class-header">
+                            <span>Tuberculosis (TB)</span>
+                            <span id="pct-tb">0.0%</span>
+                        </div>
+                        <div class="progress-bar-bg">
+                            <div id="bar-tb" class="progress-bar-fill fill-tb"></div>
+                        </div>
+                    </div>
+
+                    <!-- Clase: Enfermo (Sick) -->
+                    <div class="class-row">
+                        <div class="class-header">
+                            <span>Otras Patologías (Sick)</span>
+                            <span id="pct-sick">0.0%</span>
+                        </div>
+                        <div class="progress-bar-bg">
+                            <div id="bar-sick" class="progress-bar-fill fill-sick"></div>
+                        </div>
+                    </div>
+
+                    <!-- Clase: Sano (Health) -->
+                    <div class="class-row">
+                        <div class="class-header">
+                            <span>Pulmón Sano (Health)</span>
+                            <span id="pct-health">0.0%</span>
+                        </div>
+                        <div class="progress-bar-bg">
+                            <div id="bar-health" class="progress-bar-fill fill-health"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+
+<script>
+    const dropArea        = document.getElementById('drop-area');
+    const imageInput      = document.getElementById('image-input');
+    const previewWrapper  = document.getElementById('preview-wrapper');
+    const previewOrig     = document.getElementById('preview-orig');
+    const uploadLabel     = document.getElementById('upload-label');
+    const btnSubmit       = document.getElementById('btn-submit');
+    const btnText         = document.getElementById('btn-text');
+    const loader          = document.getElementById('loader');
+    const resultsPanel    = document.getElementById('results-panel');
+    const btnDownload     = document.getElementById('btn-download-result');
+
+    // Visualizadores
+    const imgBoxes     = document.getElementById('viewer-img-boxes');
+    const imgGradcam   = document.getElementById('viewer-img-gradcam');
+    const tabBoxes     = document.getElementById('tab-btn-boxes');
+    const tabGradcam   = document.getElementById('tab-btn-gradcam');
+
+    // Reporte
+    const vBadge       = document.getElementById('verdict-badge');
+    const tChip        = document.getElementById('time-chip');
+    const barTb        = document.getElementById('bar-tb');
+    const barSick      = document.getElementById('bar-sick');
+    const barHealth    = document.getElementById('bar-health');
+    const pctTb        = document.getElementById('pct-tb');
+    const pctSick      = document.getElementById('pct-sick');
+    const pctHealth    = document.getElementById('pct-health');
+
+    let selectedFile   = null;
+    let activeTab      = 'boxes'; // para saber cuál imagen descargar
+
+    // ── Drag & Drop Eventos ──────────────────────────────────────────────────
+    ['dragenter', 'dragover'].forEach(eventName => {
+        dropArea.addEventListener(eventName, (e) => {
+            e.preventDefault();
+            dropArea.classList.add('dragover');
+        }, false);
+    });
+
+    ['dragleave', 'drop'].forEach(eventName => {
+        dropArea.addEventListener(eventName, (e) => {
+            e.preventDefault();
+            dropArea.classList.remove('dragover');
+        }, false);
+    });
+
+    dropArea.addEventListener('drop', (e) => {
+        const dt = e.dataTransfer;
+        const files = dt.files;
+        if (files.length) {
+            imageInput.files = files;
+            handleFileSelect(imageInput);
+        }
+    }, false);
+
+    function triggerFileInput() {
+        imageInput.click();
+    }
+
+    // Vuelve al estado inicial para poder seleccionar otra imagen
+    function resetUpload() {
+        selectedFile = null;
+        imageInput.value = '';
+        previewOrig.src = '';
+        previewWrapper.style.display = 'none';
+        dropArea.style.display = 'flex';
+        btnSubmit.disabled = true;
+    }
+
+    function handleFileSelect(input) {
+        if (!input.files || !input.files[0]) return;
+        selectedFile = input.files[0];
+
+        // Mostrar preview original
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            previewOrig.src = e.target.result;
+            previewWrapper.style.display = 'block'; // mostrar wrapper con botón cambiar
+            dropArea.style.display = 'none';        // ocultar zona de carga
+        };
+        reader.readAsDataURL(selectedFile);
+
+        btnSubmit.disabled = false;
+    }
+
+    // Actualiza el href del botón de descarga según la pestaña activa
+    function updateDownloadBtn() {
+        const src = activeTab === 'boxes' ? imgBoxes.src : imgGradcam.src;
+        const name = activeTab === 'boxes' ? 'deteccion_tb.jpg' : 'gradcam_tb.jpg';
+        btnDownload.href = src;
+        btnDownload.download = name;
+    }
+
+    function updateThreshLabel(val) {
+        document.getElementById('thresh-val').textContent = val;
+    }
+
+    // ── Cambiar entre Pestañas de Imagen ──────────────────────────────────────
+    function switchTab(view) {
+        activeTab = view;
+        if (view === 'boxes') {
+            tabBoxes.classList.add('active');
+            tabGradcam.classList.remove('active');
+            imgBoxes.style.display = 'block';
+            imgGradcam.style.display = 'none';
+        } else {
+            tabBoxes.classList.remove('active');
+            tabGradcam.classList.add('active');
+            imgBoxes.style.display = 'none';
+            imgGradcam.style.display = 'block';
+        }
+        updateDownloadBtn();
+    }
+
+    // ── Envío del Formulario (Inferencia) ────────────────────────────────────
+    document.getElementById('form').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        if (!selectedFile) return;
+
+        // Visual de carga
+        btnText.style.display = 'none';
+        loader.style.display  = 'inline-flex';
+        btnSubmit.disabled    = true;
+        resultsPanel.style.display = 'none';
+
+        const formData = new FormData();
+        formData.append('image', selectedFile);
+        formData.append('threshold', document.getElementById('threshold').value);
+
+        try {
+            const res = await fetch('/tb_detector/predict', {
+                method: 'POST',
+                body: formData
+            });
+            const data = await res.json();
+
+            if (data.status === 'success') {
+                // Settear imágenes resultantes
+                imgBoxes.src = data.image_boxes;
+                imgGradcam.src = data.image_gradcam ? data.image_gradcam : data.image_boxes;
+                
+                // Mostrar por defecto pestaña de boxes
+                switchTab('boxes');
+
+                // Veredicto formateado con su color correspondiente
+                const verdict = data.verdict;
+                if (verdict === 'tb') {
+                    vBadge.textContent = '🔴 Tuberculosis Detectada';
+                    vBadge.style.color = 'var(--accent)';
+                } else if (verdict === 'sick') {
+                    vBadge.textContent = '🟡 Patologías Sospechosas';
+                    vBadge.style.color = 'var(--warning)';
+                } else {
+                    vBadge.textContent = '🟢 Pulmón Sano / Normal';
+                    vBadge.style.color = 'var(--success)';
+                }
+
+                // Inferencia tiempo
+                tChip.textContent = `Inferencia en ${data.inference_ms} ms`;
+
+                // Configurar barras de progreso de confianzas
+                const report = data.class_report;
+                
+                pctTb.textContent = `${report.tb.toFixed(1)}%`;
+                barTb.style.width = `${report.tb}%`;
+
+                pctSick.textContent = `${report.sick.toFixed(1)}%`;
+                barSick.style.width = `${report.sick}%`;
+
+                pctHealth.textContent = `${report.health.toFixed(1)}%`;
+                barHealth.style.width = `${report.health}%`;
+
+                // Mostrar panel
+                resultsPanel.style.display = 'flex';
+
+                // Actualizar botón de descarga
+                updateDownloadBtn();
+
+                // Scroll suave al panel de resultados si es móvil
+                resultsPanel.scrollIntoView({ behavior: 'smooth' });
+
+            } else {
+                alert('Error en el análisis: ' + data.message);
+            }
+        } catch (err) {
+            alert('Error de red al conectar con el servidor.');
+        } finally {
+            btnText.style.display = 'inline';
+            loader.style.display  = 'none';
+            btnSubmit.disabled    = false;
+        }
+    });
+</script>
+</body>
+</html>

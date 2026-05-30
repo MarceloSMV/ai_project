@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Diagnóstico de Enfermedades — SEIC</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg:      #090d16;
+            --surface: #0f1422;
+            --card:    #151d30;
+            --border:  #1e2a45;
+            --accent:  #10b981;
+            --accent-glow: rgba(16,185,129,.3);
+            --primary: #3b82f6;
+            --danger:  #f43f5e;
+            --text:    #f3f4f6;
+            --muted:   #6b7280;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Poppins', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; display: flex; flex-direction: column; }
+
+        /* ── NAV ── */
+        .topnav {
+            background: var(--surface);
+            border-bottom: 1px solid var(--border);
+            display: flex; align-items: center; justify-content: space-between;
+            padding: .9rem 2rem; position: sticky; top: 0; z-index: 100;
+        }
+        .topnav .brand {
+            font-weight: 700; font-size: 1.1rem;
+            background: linear-gradient(to right, #3b82f6, #ec4899);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+            text-decoration: none;
+        }
+        .nav-links { display: flex; gap: 8px; }
+        .nav-links a {
+            text-decoration: none; padding: .5rem 1rem; border-radius: 8px;
+            font-size: .875rem; font-weight: 500; color: var(--muted); transition: all .2s;
+        }
+        .nav-links a:hover { color: #fff; background: rgba(255,255,255,.04); }
+        .nav-links a.active { color: #fff; background: rgba(16,185,129,.12); border: 1px solid rgba(16,185,129,.3); }
+
+        /* ── LAYOUT ── */
+        main { flex: 1; padding: 2.5rem 1.5rem; max-width: 1080px; width: 100%; margin: 0 auto; }
+        h1 { font-size: 1.75rem; font-weight: 700; margin-bottom: .4rem; }
+        .subtitle { font-size: .875rem; color: var(--muted); margin-bottom: 2rem; }
+
+        /* ── SYMPTOM GRID ── */
+        .symptoms-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+        .symptom-card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 1rem 1.2rem;
+            display: flex; align-items: flex-start; gap: 12px;
+            cursor: pointer;
+            transition: all .2s;
+            user-select: none;
+        }
+        .symptom-card:hover { border-color: rgba(16,185,129,.4); transform: translateY(-2px); }
+        .symptom-card.selected {
+            border-color: var(--accent);
+            background: rgba(16,185,129,.06);
+            box-shadow: 0 4px 14px rgba(16,185,129,.15);
+        }
+        .symptom-card input[type="checkbox"] {
+            width: 17px; height: 17px;
+            accent-color: var(--accent);
+            cursor: pointer; margin-top: 2px; flex-shrink: 0;
+        }
+        .symptom-text { font-size: .875rem; font-weight: 500; line-height: 1.45; }
+        .symptom-id {
+            font-size: .72rem; font-weight: 700;
+            background: var(--border); color: var(--muted);
+            padding: 2px 7px; border-radius: 5px;
+            white-space: nowrap; align-self: center; flex-shrink: 0;
+        }
+
+        /* ── LOADING STATE ── */
+        .loading-msg { text-align: center; color: var(--muted); padding: 3rem 0; }
+
+        /* ── BUTTON ── */
+        .btn {
+            display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+            padding: .9rem 2.5rem; border-radius: 12px; border: none;
+            font-family: inherit; font-size: 1rem; font-weight: 600;
+            cursor: pointer; background: var(--accent); color: #fff;
+            box-shadow: 0 4px 16px var(--accent-glow); transition: all .2s;
+        }
+        .btn:hover  { background: #059669; transform: translateY(-2px); box-shadow: 0 8px 22px var(--accent-glow); }
+        .btn:active { transform: translateY(1px); }
+        .btn:disabled { opacity: .5; cursor: not-allowed; transform: none; }
+        .btn-row { display: flex; gap: 1rem; flex-wrap: wrap; align-items: center; }
+        .btn-clear {
+            display: inline-flex; align-items: center; gap: 6px;
+            padding: .9rem 1.4rem; border-radius: 12px; border: 1px solid var(--border);
+            background: transparent; color: var(--muted);
+            font-family: inherit; font-size: .9rem; font-weight: 500;
+            cursor: pointer; transition: all .2s;
+        }
+        .btn-clear:hover { background: rgba(255,255,255,.04); color: #fff; }
+        .selection-count { font-size: .875rem; color: var(--muted); }
+
+        /* ── RESULT ── */
+        .result-box {
+            margin-top: 2rem;
+            padding: 1.75rem 2rem;
+            border-radius: 16px;
+            display: none;
+            animation: fadeUp .3s ease;
+        }
+        @keyframes fadeUp { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:none; } }
+        .result-box.success { background: rgba(16,185,129,.06); border: 1px solid var(--accent); box-shadow: 0 4px 20px var(--accent-glow); }
+        .result-box.error   { background: rgba(244,63,94,.06); border: 1px solid var(--danger); }
+        .result-title { font-size: 1rem; font-weight: 600; color: var(--muted); margin-bottom: .75rem; }
+        .disease-tag {
+            display: inline-block;
+            background: rgba(16,185,129,.12);
+            border: 1px solid rgba(16,185,129,.3);
+            color: var(--accent);
+            padding: .4rem 1rem; border-radius: 20px;
+            font-weight: 600; font-size: .95rem; margin: .3rem .3rem .3rem 0;
+        }
+
+        /* ── DOTS LOADER ── */
+        .dots { display: inline-flex; gap: 4px; }
+        .dots span { width: 7px; height: 7px; background: #fff; border-radius: 50%; animation: bounce .55s infinite alternate; }
+        .dots span:nth-child(2) { animation-delay: .18s; }
+        .dots span:nth-child(3) { animation-delay: .36s; }
+        @keyframes bounce { to { transform: translateY(-7px); } }
+    </style>
+</head>
+<body>
+
+<!-- NAVEGACIÓN -->
+<nav class="topnav">
+    <a href="/" class="brand">🏥 SEIC &amp; IA</a>
+    <div class="nav-links">
+        <a href="/aereo/">✈️ Predictor Aéreo</a>
+        <a href="/enfermedad/diagnosticar/" class="active">🩺 Diagnosticar</a>
+        <a href="/enfermedad/configurar/">⚙️ Configurar Sistema</a>
+        <a href="/tb_detector/">🫁 TBC (CNN)</a>
+        <a href="/tb_detector/arbol">🌳 TBC (Árbol)</a>
+        <a href="/titanic_ad/">🚢 Titanic AD</a>
+    </div>
+</nav>
+
+<!-- CONTENIDO PRINCIPAL -->
+<main>
+    <h1>🩺 Diagnóstico por Síntomas</h1>
+    <p class="subtitle">Selecciona los síntomas del paciente. El motor de inferencia lógica Prolog determinará la(s) patología(s) probable(s).</p>
+
+    <!-- Catálogo de síntomas -->
+    <div class="symptoms-grid" id="symptoms-grid">
+        <div class="loading-msg">⏳ Cargando catálogo de síntomas…</div>
+    </div>
+
+    <!-- Controles -->
+    <div class="btn-row">
+        <button class="btn" id="btn-diagnose" disabled>
+            <span id="btn-text">Iniciar Diagnóstico Lógico</span>
+            <span class="dots" id="loader" style="display:none;"><span></span><span></span><span></span></span>
+        </button>
+        <button class="btn-clear" id="btn-clear" onclick="clearSelection()">✕ Limpiar selección</button>
+        <span class="selection-count" id="count-label">0 síntomas seleccionados</span>
+    </div>
+
+    <!-- Resultado -->
+    <div class="result-box" id="result-box">
+        <div class="result-title">🔬 Diagnóstico del Sistema Experto:</div>
+        <div id="result-diseases"></div>
+    </div>
+</main>
+
+<script>
+const grid     = document.getElementById('symptoms-grid');
+const btnDx    = document.getElementById('btn-diagnose');
+const btnText  = document.getElementById('btn-text');
+const loader   = document.getElementById('loader');
+const resultBox = document.getElementById('result-box');
+const diseases  = document.getElementById('result-diseases');
+const countLbl  = document.getElementById('count-label');
+
+// ── Carga de síntomas ─────────────────────────────────────────────────────────
+async function loadSintomas() {
+    try {
+        const res  = await fetch('/enfermedad/diagnosticar/sintomas');
+        const data = await res.json();
+        grid.innerHTML = '';
+
+        if (!data.sintomas || data.sintomas.length === 0) {
+            grid.innerHTML = '<div class="loading-msg">No hay síntomas registrados. Configura el sistema primero.</div>';
+            return;
+        }
+
+        data.sintomas.forEach(s => {
+            const card = document.createElement('div');
+            card.className = 'symptom-card';
+            card.dataset.id = s.idsintoma;
+            card.innerHTML = `
+                <input type="checkbox" id="s${s.idsintoma}" value="${s.idsintoma}">
+                <label class="symptom-text" for="s${s.idsintoma}">${s.sintoma}</label>
+                <span class="symptom-id">S${s.idsintoma}</span>
+            `;
+            card.addEventListener('click', (e) => {
+                const cb = card.querySelector('input');
+                if (e.target !== cb) cb.checked = !cb.checked;
+                card.classList.toggle('selected', cb.checked);
+                updateCount();
+            });
+            grid.appendChild(card);
+        });
+        updateCount();
+    } catch {
+        grid.innerHTML = '<div class="loading-msg" style="color:var(--danger)">Error al cargar síntomas. Verifica el servidor.</div>';
+    }
+}
+
+function updateCount() {
+    const n = document.querySelectorAll('#symptoms-grid input:checked').length;
+    countLbl.textContent = `${n} síntoma${n !== 1 ? 's' : ''} seleccionado${n !== 1 ? 's' : ''}`;
+    btnDx.disabled = n === 0;
+}
+
+function clearSelection() {
+    document.querySelectorAll('#symptoms-grid input').forEach(cb => cb.checked = false);
+    document.querySelectorAll('.symptom-card').forEach(c => c.classList.remove('selected'));
+    resultBox.style.display = 'none';
+    updateCount();
+}
+
+// ── Diagnóstico ───────────────────────────────────────────────────────────────
+btnDx.addEventListener('click', async () => {
+    const checked = [...document.querySelectorAll('#symptoms-grid input:checked')];
+    if (!checked.length) return;
+
+    const sintomas = checked.map(cb => parseInt(cb.value));
+    btnText.style.display = 'none';
+    loader.style.display  = 'inline-flex';
+    btnDx.disabled = true;
+    resultBox.style.display = 'none';
+
+    try {
+        const res  = await fetch('/enfermedad/diagnosticar/predict', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ sintomas })
+        });
+        const data = await res.json();
+
+        if (data.status === 'success') {
+            diseases.innerHTML = data.enfermedades
+                .map(e => `<span class="disease-tag">🦠 ${e}</span>`)
+                .join('');
+            resultBox.className = 'result-box success';
+            resultBox.style.display = 'block';
+        } else {
+            diseases.innerHTML = `<span style="color:var(--danger)">${data.message}</span>`;
+            resultBox.className = 'result-box error';
+            resultBox.style.display = 'block';
+        }
+    } catch {
+        diseases.innerHTML = '<span style="color:var(--danger)">Error de conexión con el servidor.</span>';
+        resultBox.className = 'result-box error';
+        resultBox.style.display = 'block';
+    } finally {
+        btnText.style.display = 'inline';
+        loader.style.display  = 'none';
+        btnDx.disabled = false;
+        updateCount();
+    }
+});
+
+// Iniciar
+loadSintomas();
+</script>
+</body>
+</html>

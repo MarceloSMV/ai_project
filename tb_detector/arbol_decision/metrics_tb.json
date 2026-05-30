@@ -1,0 +1,69 @@
+{
+  "train_score": 87.0879,
+  "test_score": 80.0,
+  "score_manual_testing": 80.0,
+  "sensibilidad_tb": 0.5667,
+  "especificidad_tb": 0.9349,
+  "max_depth_optimo": 8,
+  "total_imagenes": 9100,
+  "confusion_matrix_train": [
+    [
+      2721,
+      247,
+      72
+    ],
+    [
+      282,
+      2662,
+      96
+    ],
+    [
+      129,
+      114,
+      957
+    ]
+  ],
+  "confusion_matrix_test": [
+    [
+      665,
+      66,
+      29
+    ],
+    [
+      69,
+      621,
+      70
+    ],
+    [
+      44,
+      86,
+      170
+    ]
+  ],
+  "clases": [
+    "health",
+    "sick",
+    "tb"
+  ],
+  "classification_report": {
+    "health": {
+      "precision": 0.8548,
+      "recall": 0.875,
+      "f1_score": 0.8648,
+      "support": 760
+    },
+    "sick": {
+      "precision": 0.8034,
+      "recall": 0.8171,
+      "f1_score": 0.8102,
+      "support": 760
+    },
+    "tb": {
+      "precision": 0.632,
+      "recall": 0.5667,
+      "f1_score": 0.5975,
+      "support": 300
+    }
+  },
+  "accuracy_overall": 0.8
+}

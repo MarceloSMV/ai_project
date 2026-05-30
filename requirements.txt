@@ -1,0 +1,48 @@
+# ============================================================
+# requirements.txt — Proyecto SEIC (Sistema Experto + IA)
+# Universidad UNTELLS · Curso: Inteligencia Artificial
+# ============================================================
+# Instalar con:
+#   .venv\Scripts\pip install -r requirements.txt
+#
+# Para PyTorch con GPU (recomendado si tienes NVIDIA):
+#   pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu121
+# Para PyTorch solo CPU:
+#   pip install torch torchvision torchaudio
+# ============================================================
+
+--extra-index-url https://download.pytorch.org/whl/cu121
+
+
+# ── Servidor web ─────────────────────────────────────────────
+Flask>=3.0.0
+Werkzeug>=3.0.0
+
+# ── Módulo: aereo (Red Neuronal — TensorFlow) ────────────────
+tensorflow>=2.15.0
+numpy>=1.26.0
+pandas>=2.2.0
+
+# ── Módulo: enfermedad (Sistema Experto — Prolog) ────────────
+pyswip>=0.2.10
+
+# ── Módulo: tb_detector/vision_computacional (Faster R-CNN) ──
+# Nota: instala PyTorch por separado con el comando de arriba
+torch>=2.2.0
+torchvision>=0.17.0
+torchaudio>=2.2.0
+
+# ── Visión computacional ─────────────────────────────────────
+opencv-python>=4.9.0
+Pillow>=10.2.0
+
+# ── Evaluación y métricas ────────────────────────────────────
+torchmetrics>=1.3.0
+scipy>=1.12.0
+
+# ── Utilidades generales ─────────────────────────────────────
+tqdm>=4.66.0
+matplotlib>=3.8.0
+
+# ── Módulos: titanicAD / arbol_decision (Machine Learning) ───
+scikit-learn>=1.3.0

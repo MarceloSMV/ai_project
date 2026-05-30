@@ -1,0 +1,42 @@
+{
+  "train_score": 98.2,
+  "test_score": 74.6,
+  "sensibilidad": 0.9773,
+  "especificidad": 0.9896,
+  "confusion_matrix_train": [
+    [
+      301,
+      2
+    ],
+    [
+      7,
+      191
+    ]
+  ],
+  "confusion_matrix_test": [
+    [
+      65,
+      16
+    ],
+    [
+      16,
+      29
+    ]
+  ],
+  "classification_report_test": {
+    "precision_0": 0.8025,
+    "recall_0": 0.8025,
+    "f1_0": 0.8025,
+    "precision_1": 0.6444,
+    "recall_1": 0.6444,
+    "f1_1": 0.6444,
+    "accuracy": 0.746
+  },
+  "columnas": [
+    "Fare",
+    "Pclass",
+    "Gender",
+    "Age",
+    "SibSp"
+  ]
+}

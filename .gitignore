@@ -1,0 +1,67 @@
+# --- Entornos Virtuales y Python ---
+.venv/
+venv/
+env/
+ENV/
+pyvenv.cfg
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.pytest_cache/
+.mypy_cache/
+
+# --- Jupyter Notebooks ---
+.ipynb_checkpoints/
+*/.ipynb_checkpoints/*
+
+# --- Archivos de Datos Grandes / Datasets ---
+# Nota: Evita subir datasets pesados a Git.
+data/
+datasets/
+tb_detector/imgs/
+tb_detector/vision_computacional/runs/
+*.zip
+*.tar.gz
+*.rar
+*.7z
+*.gz
+*.csv
+*.xlsx
+*.tsv
+
+# --- Pesos de Modelos de IA / Aprendizaje Profundo ---
+*.h5
+*.pth
+*.pt
+*.safetensors
+*.onnx
+*.pkl
+*.joblib
+*.pb
+*.model
+*.weights
+*.bin
+*.npy
+*.npz
+
+# --- Configuraciones del Editor (VS Code, PyCharm, etc.) ---
+.vscode/
+.idea/
+.history/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+
+# --- Secretos y Variables de Entorno ---
+# ¡CRÍTICO: Nunca subas contraseñas, claves API o credenciales!
+.env
+.env.*
+*.local
+credentials.json
+client_secret*.json
+
+# --- Archivos del Sistema Operativo ---
+.DS_Store
+Thumbs.db

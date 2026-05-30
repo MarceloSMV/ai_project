@@ -1,0 +1,505 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SEIC — Sistema Experto e Inteligencia Artificial · UNTELLS</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg:        #090d16;
+            --surface:   #0f1422;
+            --card:      #151d30;
+            --border:    #1e2a45;
+            --text:      #f3f4f6;
+            --muted:     #6b7280;
+            --blue:      #3b82f6;
+            --blue-glow: rgba(59,130,246,.25);
+            --green:     #10b981;
+            --amber:     #f59e0b;
+            --pink:      #ec4899;
+            --sidebar-w: 270px;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            display: flex;
+            overflow: hidden;
+        }
+
+        /* ══════════════════════════════════
+           SIDEBAR
+        ══════════════════════════════════ */
+        .sidebar {
+            width: var(--sidebar-w);
+            min-height: 100vh;
+            background: var(--surface);
+            border-right: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            padding: 0;
+            flex-shrink: 0;
+            position: relative;
+            z-index: 10;
+        }
+
+        /* Cabecera del sidebar */
+        .sidebar-header {
+            padding: 2rem 1.5rem 1.5rem;
+            border-bottom: 1px solid var(--border);
+        }
+        .sidebar-logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: .5rem;
+        }
+        .logo-icon {
+            width: 40px; height: 40px;
+            border-radius: 10px;
+            background: linear-gradient(135deg, #3b82f6, #ec4899);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.2rem;
+            flex-shrink: 0;
+        }
+        .logo-text {
+            font-weight: 800;
+            font-size: 1.15rem;
+            background: linear-gradient(to right, #3b82f6, #ec4899);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            line-height: 1.2;
+        }
+        .logo-sub {
+            font-size: .7rem;
+            color: var(--muted);
+            font-weight: 400;
+            -webkit-text-fill-color: var(--muted);
+        }
+
+        /* Secciones del menú */
+        .sidebar-section {
+            padding: 1.25rem 1rem;
+            flex: 1;
+        }
+        .sidebar-label {
+            font-size: .68rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: .1em;
+            color: var(--muted);
+            padding: 0 .5rem;
+            margin-bottom: .6rem;
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: .72rem 1rem;
+            border-radius: 10px;
+            text-decoration: none;
+            color: var(--muted);
+            font-size: .875rem;
+            font-weight: 500;
+            margin-bottom: 4px;
+            transition: all .2s;
+            position: relative;
+        }
+        .nav-item:hover {
+            color: var(--text);
+            background: rgba(255,255,255,.04);
+        }
+        .nav-item.active {
+            color: var(--text);
+            background: rgba(59,130,246,.1);
+        }
+        .nav-item.active::before {
+            content: '';
+            position: absolute;
+            left: 0; top: 20%; bottom: 20%;
+            width: 3px;
+            border-radius: 2px;
+            background: var(--blue);
+        }
+        .nav-item .nav-icon {
+            font-size: 1rem;
+            width: 22px;
+            text-align: center;
+        }
+        .nav-badge {
+            margin-left: auto;
+            font-size: .65rem;
+            font-weight: 700;
+            padding: 2px 7px;
+            border-radius: 20px;
+            background: var(--blue);
+            color: #fff;
+        }
+
+        /* Módulos: colores de acento */
+        .nav-item.aereo:hover,  .nav-item.aereo.active  { background: rgba(59,130,246,.08); }
+        .nav-item.aereo.active::before { background: var(--blue); }
+        .nav-item.aereo:hover .nav-icon { color: var(--blue); }
+
+        .nav-item.diagn:hover,  .nav-item.diagn.active  { background: rgba(16,185,129,.08); }
+        .nav-item.diagn.active::before { background: var(--green); }
+        .nav-item.diagn:hover .nav-icon { color: var(--green); }
+
+        .nav-item.config:hover, .nav-item.config.active { background: rgba(245,158,11,.08); }
+        .nav-item.config.active::before { background: var(--amber); }
+        .nav-item.config:hover .nav-icon { color: var(--amber); }
+
+        .nav-item.tb_detector:hover, .nav-item.tb_detector.active { background: rgba(244,63,94,.08); }
+        .nav-item.tb_detector.active::before { background: var(--pink); }
+        .nav-item.tb_detector:hover .nav-icon { color: var(--pink); }
+
+        .nav-item.titanic:hover, .nav-item.titanic.active { background: rgba(139,92,246,.08); }
+        .nav-item.titanic.active::before { background: #8b5cf6; }
+        .nav-item.titanic:hover .nav-icon { color: #8b5cf6; }
+
+        /* Footer del sidebar */
+        .sidebar-footer {
+            padding: 1rem 1.5rem;
+            border-top: 1px solid var(--border);
+            font-size: .75rem;
+            color: var(--muted);
+            line-height: 1.6;
+        }
+
+        /* ══════════════════════════════════
+           CONTENIDO PRINCIPAL
+        ══════════════════════════════════ */
+        .main {
+            flex: 1;
+            overflow-y: auto;
+            padding: 3.5rem 4rem;
+            display: flex;
+            flex-direction: column;
+            gap: 3rem;
+        }
+
+        /* ── HERO ── */
+        .hero {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+        .hero-chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: rgba(59,130,246,.1);
+            border: 1px solid rgba(59,130,246,.3);
+            color: var(--blue);
+            font-size: .75rem;
+            font-weight: 600;
+            padding: .35rem .9rem;
+            border-radius: 20px;
+            width: fit-content;
+        }
+        .hero h1 {
+            font-size: 2.6rem;
+            font-weight: 800;
+            line-height: 1.2;
+            background: linear-gradient(135deg, #f3f4f6 30%, #6b7280);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .hero p {
+            font-size: 1rem;
+            color: var(--muted);
+            max-width: 620px;
+            line-height: 1.75;
+        }
+
+        /* Accesos rápidos */
+        .quick-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+            gap: 1.25rem;
+        }
+        .quick-card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 1.5rem;
+            text-decoration: none;
+            color: var(--text);
+            display: flex;
+            flex-direction: column;
+            gap: .75rem;
+            transition: all .25s;
+            position: relative;
+            overflow: hidden;
+        }
+        .quick-card::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(135deg, transparent 60%, rgba(255,255,255,.02));
+            pointer-events: none;
+        }
+        .quick-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 30px rgba(0,0,0,.4);
+        }
+        .quick-card.blue:hover  { border-color: rgba(59,130,246,.5); box-shadow: 0 12px 30px rgba(59,130,246,.15); }
+        .quick-card.green:hover { border-color: rgba(16,185,129,.5); box-shadow: 0 12px 30px rgba(16,185,129,.15); }
+        .quick-card.amber:hover { border-color: rgba(245,158,11,.5); box-shadow: 0 12px 30px rgba(245,158,11,.15); }
+        .quick-card.pink:hover   { border-color: rgba(236,72,153,.5); box-shadow: 0 12px 30px rgba(236,72,153,.15); }
+        .quick-card.purple:hover { border-color: rgba(139,92,246,.5); box-shadow: 0 12px 30px rgba(139,92,246,.15); }
+
+        .qc-icon {
+            width: 44px; height: 44px;
+            border-radius: 12px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.3rem;
+        }
+        .qc-icon.blue  { background: rgba(59,130,246,.12); }
+        .qc-icon.green { background: rgba(16,185,129,.12); }
+        .qc-icon.amber { background: rgba(245,158,11,.12); }
+        .qc-icon.pink  { background: rgba(236,72,153,.12); color: var(--pink); }
+        .qc-icon.purple { background: rgba(139,92,246,.12); color: #8b5cf6; }
+
+        .qc-title { font-size: 1rem; font-weight: 600; }
+        .qc-desc  { font-size: .8rem; color: var(--muted); line-height: 1.5; }
+        .qc-arrow {
+            margin-top: auto;
+            font-size: .8rem;
+            color: var(--muted);
+            display: flex; align-items: center; gap: 5px;
+            transition: gap .2s, color .2s;
+        }
+        .quick-card:hover .qc-arrow { gap: 10px; color: var(--text); }
+
+        /* ── EQUIPO ── */
+        .section-title {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--muted);
+            text-transform: uppercase;
+            letter-spacing: .08em;
+            font-size: .75rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 1.25rem;
+        }
+        .section-title::after {
+            content: '';
+            flex: 1;
+            height: 1px;
+            background: var(--border);
+        }
+
+        .team-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1rem;
+        }
+        .team-card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 1.4rem 1.5rem;
+            display: flex;
+            flex-direction: column;
+            gap: .5rem;
+            transition: border-color .2s, transform .2s;
+        }
+        .team-card:hover {
+            border-color: rgba(59,130,246,.3);
+            transform: translateY(-2px);
+        }
+        .avatar {
+            width: 46px; height: 46px;
+            border-radius: 12px;
+            background: linear-gradient(135deg, var(--blue), var(--pink));
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: #fff;
+            margin-bottom: .25rem;
+        }
+        .team-name {
+            font-size: .95rem;
+            font-weight: 600;
+            line-height: 1.3;
+        }
+        .team-role {
+            font-size: .78rem;
+            color: var(--muted);
+        }
+
+        /* Colores de avatar por persona */
+        .avatar.av1 { background: linear-gradient(135deg, #3b82f6, #8b5cf6); }
+        .avatar.av2 { background: linear-gradient(135deg, #10b981, #3b82f6); }
+        .avatar.av3 { background: linear-gradient(135deg, #f59e0b, #ec4899); }
+    </style>
+</head>
+<body>
+
+<!-- ══════════════════════════════════
+     SIDEBAR
+══════════════════════════════════ -->
+<aside class="sidebar">
+    <div class="sidebar-header">
+        <div class="sidebar-logo">
+            <div class="logo-icon">🏥</div>
+            <div>
+                <div class="logo-text">SEIC</div>
+                <div class="logo-sub">Sistema Experto e I.A.</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="sidebar-section">
+        <div class="sidebar-label">Redes Neuronales</div>
+        <a href="/aereo/" class="nav-item aereo">
+            <span class="nav-icon">✈️</span>
+            Predictor de Vuelo
+            <span class="nav-badge">DL</span>
+        </a>
+
+        <div class="sidebar-label" style="margin-top:1rem;">Visión Computacional</div>
+        <a href="/tb_detector/" class="nav-item tb_detector">
+            <span class="nav-icon">🫁</span>
+            Detector TBC
+            <span class="nav-badge">CNN</span>
+        </a>
+
+        <div class="sidebar-label" style="margin-top:1rem;">Árboles de Decisión</div>
+        <a href="/tb_detector/arbol" class="nav-item tb_detector_arbol">
+            <span class="nav-icon">🌳</span>
+            TBC (Árbol)
+            <span class="nav-badge">ML</span>
+        </a>
+        <a href="/titanic_ad/" class="nav-item titanic">
+            <span class="nav-icon">🚢</span>
+            Titanic AD
+            <span class="nav-badge">ML</span>
+        </a>
+
+        <div class="sidebar-label" style="margin-top:1rem;">Sistema Experto</div>
+        <a href="/enfermedad/diagnosticar/" class="nav-item diagn">
+            <span class="nav-icon">🩺</span>
+            Diagnosticar Enfermedad
+            <span class="nav-badge">Prolog</span>
+        </a>
+        <a href="/enfermedad/configurar/" class="nav-item config">
+            <span class="nav-icon">⚙️</span>
+            Configurar Sistema
+        </a>
+    </div>
+
+    <div class="sidebar-footer">
+        UNTELLS · 2025<br>
+        Inteligencia Artificial
+    </div>
+</aside>
+
+<!-- ══════════════════════════════════
+     CONTENIDO
+══════════════════════════════════ -->
+<main class="main">
+
+    <!-- HERO -->
+    <section class="hero">
+        <div class="hero-chip">🎓 Proyecto Académico · UNTELLS</div>
+        <h1>Sistema Experto e<br>Inteligencia Artificial</h1>
+        <p>
+            Plataforma integrada desarrollada para el curso de <strong>Inteligencia Artificial</strong>
+            de la Universidad <strong>UNTELLS</strong>, bajo la dirección del docente
+            <strong>Mg. Huarote Zegarra, Raúl Eduardo</strong>. Explora las distintas técnicas de IA 
+            implementadas agrupadas por sus enfoques algorítmicos.
+        </p>
+    </section>
+
+    <!-- ACCESOS RÁPIDOS -->
+    <section>
+        <div class="section-title">Redes Neuronales (Deep Learning)</div>
+        <div class="quick-grid">
+            <a href="/aereo/" class="quick-card blue">
+                <div class="qc-icon blue">✈️</div>
+                <div class="qc-title">Predictor de Vuelo</div>
+                <div class="qc-desc">Red neuronal profunda (TensorFlow) entrenada con datos históricos de accidentes aéreos.</div>
+                <div class="qc-arrow">Abrir módulo →</div>
+            </a>
+        </div>
+
+        <div class="section-title" style="margin-top:2.5rem;">Visión Computacional</div>
+        <div class="quick-grid">
+            <a href="/tb_detector/" class="quick-card pink">
+                <div class="qc-icon pink">🫁</div>
+                <div class="qc-title">Detector de Tuberculosis</div>
+                <div class="qc-desc">Análisis de visión artificial (Faster R-CNN / PyTorch) y Grad-CAM para radiografías de tórax.</div>
+                <div class="qc-arrow">Abrir módulo →</div>
+            </a>
+        </div>
+
+        <div class="section-title" style="margin-top:2.5rem;">Machine Learning (Árboles de Decisión)</div>
+        <div class="quick-grid">
+            <a href="/titanic_ad/" class="quick-card purple">
+                <div class="qc-icon purple">🚢</div>
+                <div class="qc-title">Titanic — Árbol de Decisión</div>
+                <div class="qc-desc">Árbol de decisión (sklearn) que predice supervivencia en el Titanic con visualización interactiva.</div>
+                <div class="qc-arrow">Abrir módulo →</div>
+            </a>
+            <a href="/tb_detector/arbol" class="quick-card pink">
+                <div class="qc-icon pink">🌳</div>
+                <div class="qc-title">Detector TBC — Árbol</div>
+                <div class="qc-desc">Árbol de Decisión puro entrenado con imágenes discretizadas en niveles de luz (O/M/C).</div>
+                <div class="qc-arrow">Abrir módulo →</div>
+            </a>
+        </div>
+
+        <div class="section-title" style="margin-top:2.5rem;">Sistemas Expertos (Lógica)</div>
+        <div class="quick-grid">
+            <a href="/enfermedad/diagnosticar/" class="quick-card green">
+                <div class="qc-icon green">🩺</div>
+                <div class="qc-title">Diagnosticar Enfermedad</div>
+                <div class="qc-desc">Inferencia lógica Prolog sobre síntomas seleccionados para identificar patologías.</div>
+                <div class="qc-arrow">Abrir módulo →</div>
+            </a>
+            <a href="/enfermedad/configurar/" class="quick-card amber">
+                <div class="qc-icon amber">⚙️</div>
+                <div class="qc-title">Configurar Sistema</div>
+                <div class="qc-desc">Gestiona el catálogo de síntomas, enfermedades y la matriz de conocimiento.</div>
+                <div class="qc-arrow">Abrir módulo →</div>
+            </a>
+        </div>
+    </section>
+
+    <!-- EQUIPO -->
+    <section>
+        <div class="section-title">Equipo de desarrollo</div>
+        <div class="team-grid">
+            <div class="team-card">
+                <div class="avatar av1">CB</div>
+                <div class="team-name">Chipana Bandera,<br>Benjamin Adriano</div>
+                <div class="team-role">Integrante del equipo</div>
+            </div>
+            <div class="team-card">
+                <div class="avatar av2">MV</div>
+                <div class="team-name">Molina Vera,<br>Marcelo Samuel</div>
+                <div class="team-role">Integrante del equipo</div>
+            </div>
+            <div class="team-card">
+                <div class="avatar av3">RS</div>
+                <div class="team-name">Roncal Saravia,<br>Jorge Rafael</div>
+                <div class="team-role">Integrante del equipo</div>
+            </div>
+        </div>
+    </section>
+
+</main>
+
+</body>
+</html>

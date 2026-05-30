@@ -1,0 +1,585 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Titanic — Árbol de Decisión · SEIC</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg:      #090d16;
+            --surface: #0f1422;
+            --card:    #151d30;
+            --border:  #1e2a45;
+            --accent:  #8b5cf6;
+            --accent-glow: rgba(139,92,246,.35);
+            --primary: #3b82f6;
+            --success: #10b981;
+            --danger:  #f43f5e;
+            --warning: #f59e0b;
+            --text:    #f3f4f6;
+            --muted:   #6b7280;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* ── TOP NAV ── */
+        .topnav {
+            background: var(--surface);
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: .9rem 2rem;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        .topnav .brand {
+            font-weight: 700;
+            font-size: 1.1rem;
+            background: linear-gradient(to right, #3b82f6, #ec4899);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-decoration: none;
+        }
+        .nav-links { display: flex; gap: 8px; flex-wrap: wrap; }
+        .nav-links a {
+            text-decoration: none;
+            padding: .5rem 1rem;
+            border-radius: 8px;
+            font-size: .875rem;
+            font-weight: 500;
+            color: var(--muted);
+            transition: all .2s;
+        }
+        .nav-links a:hover { color: #fff; background: rgba(255,255,255,.04); }
+        .nav-links a.active {
+            color: #fff;
+            background: rgba(139,92,246,0.12);
+            border: 1px solid rgba(139,92,246,0.3);
+        }
+
+        /* ── MAIN ── */
+        main {
+            flex: 1;
+            max-width: 1200px;
+            width: 100%;
+            margin: 0 auto;
+            padding: 2.5rem 1.5rem;
+        }
+        h1 {
+            font-size: 1.75rem;
+            font-weight: 700;
+            margin-bottom: .4rem;
+        }
+        .subtitle {
+            font-size: .875rem;
+            color: var(--muted);
+            margin-bottom: 2rem;
+            max-width: 700px;
+            line-height: 1.7;
+        }
+
+        .layout-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 2rem;
+        }
+        @media(min-width: 850px) {
+            .layout-grid {
+                grid-template-columns: 400px 1fr;
+            }
+        }
+
+        /* ── CARDS ── */
+        .card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 18px;
+            padding: 2rem;
+            height: fit-content;
+            box-shadow: 0 10px 30px rgba(0,0,0,.4);
+        }
+        .card-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        /* ── FORM CONTROLS ── */
+        .form-group {
+            margin-bottom: 1.25rem;
+        }
+        .form-label {
+            display: block;
+            font-size: .78rem;
+            font-weight: 500;
+            color: var(--muted);
+            margin-bottom: .4rem;
+        }
+        .form-input, .form-select {
+            width: 100%;
+            padding: .7rem 1rem;
+            border-radius: 10px;
+            border: 1px solid var(--border);
+            background: rgba(255,255,255,.03);
+            color: var(--text);
+            font-family: inherit;
+            font-size: .88rem;
+            outline: none;
+            transition: border-color .2s;
+        }
+        .form-input:focus, .form-select:focus {
+            border-color: var(--accent);
+        }
+        .form-select option {
+            background: var(--card);
+            color: var(--text);
+        }
+
+        /* ── BUTTON ── */
+        .btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            width: 100%;
+            padding: .9rem;
+            border-radius: 12px;
+            border: none;
+            font-family: inherit;
+            font-size: .95rem;
+            font-weight: 600;
+            cursor: pointer;
+            background: var(--accent);
+            color: #fff;
+            box-shadow: 0 4px 16px var(--accent-glow);
+            transition: all .2s;
+            margin-top: .5rem;
+        }
+        .btn:hover { background: #7c3aed; transform: translateY(-2px); box-shadow: 0 8px 22px var(--accent-glow); }
+        .btn:active { transform: translateY(1px); }
+
+        /* ── LOADER ── */
+        .dots { display: inline-flex; gap: 4px; }
+        .dots span {
+            width: 7px; height: 7px;
+            background: #fff; border-radius: 50%;
+            animation: bounce .55s infinite alternate;
+        }
+        .dots span:nth-child(2) { animation-delay: .18s; }
+        .dots span:nth-child(3) { animation-delay: .36s; }
+        @keyframes bounce { to { transform: translateY(-7px); } }
+
+        /* ── RESULTS ── */
+        .results-panel {
+            display: none;
+            animation: fadeUp .35s cubic-bezier(.16,1,.3,1);
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+        @keyframes fadeUp { from { opacity:0; transform:translateY(12px); } to { opacity:1; transform:none; } }
+
+        .result-badge {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 1.2rem 1.5rem;
+            border-radius: 14px;
+            font-size: 1.15rem;
+            font-weight: 700;
+        }
+        .result-badge.survived {
+            background: rgba(16,185,129,.08);
+            border: 1px solid rgba(16,185,129,.35);
+            color: var(--success);
+        }
+        .result-badge.dead {
+            background: rgba(244,63,94,.08);
+            border: 1px solid rgba(244,63,94,.35);
+            color: var(--danger);
+        }
+
+        /* Barras de probabilidad */
+        .prob-section { display: flex; flex-direction: column; gap: 12px; }
+        .prob-row { display: flex; flex-direction: column; gap: 4px; }
+        .prob-header {
+            display: flex;
+            justify-content: space-between;
+            font-size: .8rem;
+            font-weight: 500;
+        }
+        .bar-bg {
+            height: 10px;
+            background: var(--border);
+            border-radius: 5px;
+            overflow: hidden;
+        }
+        .bar-fill {
+            height: 100%;
+            border-radius: 5px;
+            width: 0%;
+            transition: width .6s cubic-bezier(.16,1,.3,1);
+        }
+        .fill-surv { background: var(--success); }
+        .fill-dead { background: var(--danger); }
+
+        /* ── TREE SECTION ── */
+        .tree-section {
+            margin-top: 2.5rem;
+        }
+        .tree-section .card {
+            padding: 1.5rem;
+        }
+        .tree-viewer {
+            width: 100%;
+            overflow-x: auto;
+            background: #fff;
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            margin-top: 1rem;
+            position: relative;
+        }
+        .tree-viewer img {
+            max-width: none;
+            min-width: 100%;
+            height: auto;
+            display: block;
+        }
+
+        /* ── METRICS SECTION ── */
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+        .metric-card {
+            background: rgba(255,255,255,.02);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 1rem;
+            text-align: center;
+        }
+        .metric-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: .25rem;
+        }
+        .metric-label {
+            font-size: .72rem;
+            color: var(--muted);
+            font-weight: 500;
+        }
+        .metric-value.green { color: var(--success); }
+        .metric-value.blue  { color: var(--primary); }
+        .metric-value.amber { color: var(--warning); }
+        .metric-value.purple { color: var(--accent); }
+
+        /* Confusion matrix image */
+        .confusion-viewer {
+            width: 100%;
+            max-width: 420px;
+            margin: 1rem auto 0;
+            background: #fff;
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            overflow: hidden;
+        }
+        .confusion-viewer img {
+            width: 100%;
+            height: auto;
+            display: block;
+        }
+
+        /* ── TABS ── */
+        .tabs {
+            display: flex;
+            gap: 6px;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 0;
+            margin-bottom: 1rem;
+        }
+        .tab-btn {
+            background: none;
+            border: none;
+            font-family: inherit;
+            font-size: .82rem;
+            font-weight: 500;
+            color: var(--muted);
+            padding: .6rem 1.1rem;
+            cursor: pointer;
+            border-bottom: 2px solid transparent;
+            transition: all .2s;
+        }
+        .tab-btn:hover { color: #fff; }
+        .tab-btn.active {
+            color: var(--accent);
+            border-bottom-color: var(--accent);
+            font-weight: 600;
+        }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; animation: fadeUp .3s ease; }
+
+        /* ── INPUT ROW ── */
+        .input-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+    </style>
+</head>
+<body>
+
+<!-- NAVEGACIÓN -->
+<nav class="topnav">
+    <a href="/" class="brand">🏥 SEIC &amp; IA</a>
+    <div class="nav-links">
+        <a href="/aereo/">✈️ Predictor Aéreo</a>
+        <a href="/enfermedad/diagnosticar/">🩺 Diagnosticar</a>
+        <a href="/enfermedad/configurar/">⚙️ Configurar Sistema</a>
+        <a href="/tb_detector/">🫁 TBC (CNN)</a>
+        <a href="/tb_detector/arbol">🌳 TBC (Árbol)</a>
+        <a href="/titanic_ad/" class="active">🚢 Titanic AD</a>
+    </div>
+</nav>
+
+<!-- CONTENIDO PRINCIPAL -->
+<main>
+    <h1>🚢 Predicción de Supervivencia — Titanic</h1>
+    <p class="subtitle">
+        Modelo de <strong>Árbol de Decisión</strong> (criterio: entropía) entrenado con datos del Titanic.
+        Ingresa los datos de un pasajero para predecir si habría sobrevivido al naufragio.
+        Puedes visualizar el árbol completo y las métricas del modelo más abajo.
+    </p>
+
+    <div class="layout-grid">
+        <!-- COLUMNA IZQUIERDA: FORMULARIO -->
+        <div class="card">
+            <div class="card-title">🎫 Datos del Pasajero</div>
+
+            <form id="form-predict">
+                <div class="input-row">
+                    <div class="form-group">
+                        <label class="form-label" for="fare">Tarifa (Fare) £</label>
+                        <input class="form-input" type="number" id="fare" step="0.01" min="0" value="52.0" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="pclass">Clase (Pclass)</label>
+                        <select class="form-select" id="pclass" required>
+                            <option value="1">1ª Clase</option>
+                            <option value="2">2ª Clase</option>
+                            <option value="3" selected>3ª Clase</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="input-row">
+                    <div class="form-group">
+                        <label class="form-label" for="gender">Género</label>
+                        <select class="form-select" id="gender" required>
+                            <option value="0">Masculino</option>
+                            <option value="1">Femenino</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="age">Edad</label>
+                        <input class="form-input" type="number" id="age" step="0.5" min="0" max="100" value="31" required>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="sibsp">Hermanos/Cónyuge a bordo (SibSp)</label>
+                    <input class="form-input" type="number" id="sibsp" min="0" max="10" value="1" required>
+                </div>
+
+                <button type="submit" class="btn" id="btn-predict">
+                    <span id="btn-text">🔮 Predecir Supervivencia</span>
+                    <span class="dots" id="loader" style="display:none;"><span></span><span></span><span></span></span>
+                </button>
+            </form>
+        </div>
+
+        <!-- COLUMNA DERECHA: RESULTADOS -->
+        <div class="results-panel" id="results-panel">
+            <!-- Resultado principal -->
+            <div class="result-badge" id="result-badge">
+                <span id="result-icon" style="font-size:2rem;">—</span>
+                <div>
+                    <div id="result-text" style="font-size:.85rem; font-weight:500; color:var(--muted);">Resultado</div>
+                    <div id="result-diagnosis">—</div>
+                </div>
+            </div>
+
+            <!-- Probabilidades -->
+            <div class="card">
+                <div class="card-title">📊 Probabilidades</div>
+                <div class="prob-section">
+                    <div class="prob-row">
+                        <div class="prob-header">
+                            <span>✅ Sobrevivió</span>
+                            <span id="pct-surv">0%</span>
+                        </div>
+                        <div class="bar-bg">
+                            <div id="bar-surv" class="bar-fill fill-surv"></div>
+                        </div>
+                    </div>
+                    <div class="prob-row">
+                        <div class="prob-header">
+                            <span>❌ No Sobrevivió</span>
+                            <span id="pct-dead">0%</span>
+                        </div>
+                        <div class="bar-bg">
+                            <div id="bar-dead" class="bar-fill fill-dead"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Métricas del modelo -->
+            {% if metrics %}
+            <div class="card">
+                <div class="card-title">📈 Métricas del Modelo</div>
+                <div class="metrics-grid">
+                    <div class="metric-card">
+                        <div class="metric-value green">{{ metrics.train_score }}%</div>
+                        <div class="metric-label">Accuracy (Train)</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-value blue">{{ metrics.test_score }}%</div>
+                        <div class="metric-label">Accuracy (Test)</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-value amber">{{ "%.2f"|format(metrics.sensibilidad * 100) }}%</div>
+                        <div class="metric-label">Sensibilidad</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-value purple">{{ "%.2f"|format(metrics.especificidad * 100) }}%</div>
+                        <div class="metric-label">Especificidad</div>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- SECCIÓN: ÁRBOL DE DECISIÓN Y MATRIZ -->
+    <div class="tree-section">
+        <div class="card">
+            <div class="card-title">🌳 Visualización del Modelo</div>
+
+            <div class="tabs">
+                <button class="tab-btn active" onclick="switchModelTab('tree')">🌲 Árbol de Decisión</button>
+                <button class="tab-btn" onclick="switchModelTab('confusion')">📉 Matriz de Confusión</button>
+            </div>
+
+            <div class="tab-content active" id="tab-tree">
+                <div class="tree-viewer">
+                    <img src="/titanic_ad/tree-image" alt="Árbol de Decisión Titanic"
+                         onerror="this.parentElement.innerHTML='<p style=\'padding:2rem;color:#6b7280;text-align:center;\'>Árbol no disponible. Ejecuta <code>python titanicAD/train_titanic.py</code></p>'">
+                </div>
+            </div>
+
+            <div class="tab-content" id="tab-confusion">
+                <div class="confusion-viewer">
+                    <img src="/titanic_ad/confusion-matrix" alt="Matriz de Confusión"
+                         onerror="this.parentElement.innerHTML='<p style=\'padding:2rem;color:#6b7280;text-align:center;\'>Imagen no disponible.</p>'">
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+
+<script>
+    const btnPredict = document.getElementById('btn-predict');
+    const btnText    = document.getElementById('btn-text');
+    const loader     = document.getElementById('loader');
+    const resultsPanel = document.getElementById('results-panel');
+
+    // ── Tabs del modelo ──────────────────────────────────────────────────────
+    function switchModelTab(tab) {
+        document.querySelectorAll('.tree-section .tab-btn').forEach(b => b.classList.remove('active'));
+        document.querySelectorAll('.tree-section .tab-content').forEach(c => c.classList.remove('active'));
+
+        if (tab === 'tree') {
+            document.querySelector('.tree-section .tab-btn:nth-child(1)').classList.add('active');
+            document.getElementById('tab-tree').classList.add('active');
+        } else {
+            document.querySelector('.tree-section .tab-btn:nth-child(2)').classList.add('active');
+            document.getElementById('tab-confusion').classList.add('active');
+        }
+    }
+
+    // ── Envío del formulario ─────────────────────────────────────────────────
+    document.getElementById('form-predict').addEventListener('submit', async (e) => {
+        e.preventDefault();
+
+        btnText.style.display = 'none';
+        loader.style.display  = 'inline-flex';
+
+        const payload = {
+            fare:   document.getElementById('fare').value,
+            pclass: document.getElementById('pclass').value,
+            gender: document.getElementById('gender').value,
+            age:    document.getElementById('age').value,
+            sibsp:  document.getElementById('sibsp').value,
+        };
+
+        try {
+            const res = await fetch('/titanic_ad/predict', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload),
+            });
+            const data = await res.json();
+
+            if (data.status === 'success') {
+                const badge = document.getElementById('result-badge');
+                const icon  = document.getElementById('result-icon');
+                const diag  = document.getElementById('result-diagnosis');
+
+                if (data.prediccion === 1) {
+                    badge.className = 'result-badge survived';
+                    icon.textContent = '🎉';
+                    diag.textContent = data.diagnostico;
+                } else {
+                    badge.className = 'result-badge dead';
+                    icon.textContent = '💀';
+                    diag.textContent = data.diagnostico;
+                }
+
+                // Probabilidades
+                const pSurv = data.probabilidades.sobrevivio;
+                const pDead = data.probabilidades.no_sobrevivio;
+                document.getElementById('pct-surv').textContent = pSurv + '%';
+                document.getElementById('pct-dead').textContent = pDead + '%';
+                document.getElementById('bar-surv').style.width = pSurv + '%';
+                document.getElementById('bar-dead').style.width = pDead + '%';
+
+                resultsPanel.style.display = 'flex';
+                resultsPanel.scrollIntoView({ behavior: 'smooth' });
+            } else {
+                alert('Error: ' + data.message);
+            }
+        } catch (err) {
+            alert('Error de red al conectar con el servidor.');
+        } finally {
+            btnText.style.display = 'inline';
+            loader.style.display  = 'none';
+        }
+    });
+</script>
+</body>
+</html>

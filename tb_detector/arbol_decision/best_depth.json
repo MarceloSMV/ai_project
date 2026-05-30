@@ -1,0 +1,12 @@
+{
+  "largo_optimo_raices": 8,
+  "precision_obtenida": 80.0,
+  "total_imagenes": 9100,
+  "imagenes_health": 3800,
+  "imagenes_sick": 3800,
+  "imagenes_tb": 1500,
+  "resolucion_imagen": "64x64",
+  "metodo_conversion": "Concatenacion fila-por-fila con discretizacion O/M/C",
+  "objetivo_precision": ">= 80%",
+  "precision_alcanzada": true
+}

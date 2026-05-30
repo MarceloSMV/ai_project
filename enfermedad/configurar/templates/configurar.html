@@ -1,0 +1,463 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Configurar Sistema — SEIC</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg:      #090d16;
+            --surface: #0f1422;
+            --card:    #151d30;
+            --border:  #1e2a45;
+            --accent:  #f59e0b;
+            --accent-glow: rgba(245,158,11,.3);
+            --primary: #3b82f6;
+            --success: #10b981;
+            --danger:  #f43f5e;
+            --text:    #f3f4f6;
+            --muted:   #6b7280;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Poppins', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; display: flex; flex-direction: column; }
+
+        /* ── NAV ── */
+        .topnav {
+            background: var(--surface); border-bottom: 1px solid var(--border);
+            display: flex; align-items: center; justify-content: space-between;
+            padding: .9rem 2rem; position: sticky; top: 0; z-index: 100;
+        }
+        .topnav .brand {
+            font-weight: 700; font-size: 1.1rem;
+            background: linear-gradient(to right, #3b82f6, #ec4899);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+            text-decoration: none;
+        }
+        .nav-links { display: flex; gap: 8px; }
+        .nav-links a {
+            text-decoration: none; padding: .5rem 1rem; border-radius: 8px;
+            font-size: .875rem; font-weight: 500; color: var(--muted); transition: all .2s;
+        }
+        .nav-links a:hover { color: #fff; background: rgba(255,255,255,.04); }
+        .nav-links a.active { color: #fff; background: rgba(245,158,11,.12); border: 1px solid rgba(245,158,11,.3); }
+
+        /* ── TABS ── */
+        main { flex: 1; padding: 2.5rem 1.5rem; max-width: 1100px; width: 100%; margin: 0 auto; }
+        h1 { font-size: 1.75rem; font-weight: 700; margin-bottom: .4rem; }
+        .subtitle { font-size: .875rem; color: var(--muted); margin-bottom: 2rem; }
+
+        .tabs { display: flex; gap: 8px; margin-bottom: 2rem; border-bottom: 1px solid var(--border); padding-bottom: 0; }
+        .tab-btn {
+            background: none; border: none; font-family: inherit; font-size: .9rem;
+            font-weight: 500; color: var(--muted); padding: .7rem 1.5rem;
+            cursor: pointer; border-bottom: 2px solid transparent;
+            transition: all .2s; margin-bottom: -1px;
+        }
+        .tab-btn:hover { color: #fff; }
+        .tab-btn.active { color: var(--accent); border-bottom-color: var(--accent); }
+        .tab-panel { display: none; }
+        .tab-panel.active { display: block; }
+
+        /* ── CARD ── */
+        .card {
+            background: var(--card); border: 1px solid var(--border);
+            border-radius: 16px; padding: 2rem; margin-bottom: 2rem;
+        }
+        .card-title { font-size: 1.15rem; font-weight: 600; margin-bottom: .3rem; }
+        .card-desc  { font-size: .825rem; color: var(--muted); margin-bottom: 1.5rem; }
+
+        /* ── INPUTS ── */
+        .input-row { display: flex; gap: 1rem; align-items: flex-end; }
+        .input-row input {
+            flex: 1; padding: .8rem 1rem; border-radius: 10px;
+            border: 1px solid var(--border); background: var(--bg);
+            color: #fff; font-size: .9rem; font-family: inherit; outline: none;
+            transition: border-color .2s, box-shadow .2s;
+        }
+        .input-row input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-glow); }
+
+        /* ── BUTTONS ── */
+        .btn { display: inline-flex; align-items: center; gap: 6px; padding: .75rem 1.4rem; border-radius: 10px; border: none; font-family: inherit; font-size: .9rem; font-weight: 600; cursor: pointer; transition: all .2s; }
+        .btn-amber  { background: var(--accent); color: #111; box-shadow: 0 4px 14px var(--accent-glow); }
+        .btn-amber:hover  { background: #d97706; transform: translateY(-1px); }
+        .btn-green  { background: var(--success); color: #fff; box-shadow: 0 4px 14px rgba(16,185,129,.3); }
+        .btn-green:hover  { background: #059669; transform: translateY(-1px); }
+        .btn-blue   { background: var(--primary); color: #fff; box-shadow: 0 4px 14px rgba(59,130,246,.3); }
+        .btn-blue:hover   { background: #2563eb; transform: translateY(-1px); }
+        .btn-red    { background: var(--danger);  color: #fff; }
+        .btn-red:hover    { background: #e11d48;  transform: translateY(-1px); }
+        .btn-ghost  { background: transparent; border: 1px solid var(--border); color: var(--muted); }
+        .btn-ghost:hover  { color: #fff; background: rgba(255,255,255,.04); }
+        .btn:active { transform: translateY(1px); }
+        .btn:disabled { opacity: .45; cursor: not-allowed; transform: none; }
+
+        /* ── SINTOMAS LIST ── */
+        .sintomas-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: .85rem; margin-bottom: 1.5rem; }
+        .sintoma-item {
+            background: var(--bg); border: 1px solid var(--border); border-radius: 10px;
+            padding: .85rem 1rem; display: flex; align-items: center; justify-content: space-between; gap: 8px;
+            transition: border-color .2s;
+        }
+        .sintoma-item:hover { border-color: rgba(245,158,11,.4); }
+        .sintoma-name { font-size: .85rem; font-weight: 500; flex: 1; }
+        .sintoma-id   { font-size: .72rem; font-weight: 700; background: var(--border); color: var(--muted); padding: 2px 7px; border-radius: 5px; white-space: nowrap; }
+        .item-actions { display: flex; gap: 6px; }
+        .icon-btn {
+            width: 32px; height: 32px; border-radius: 8px; border: 1px solid var(--border);
+            background: transparent; color: var(--muted); cursor: pointer; font-size: .85rem;
+            display: flex; align-items: center; justify-content: center; transition: all .2s;
+        }
+        .icon-btn:hover { color: #fff; }
+        .icon-btn.edit:hover  { border-color: var(--accent); color: var(--accent); }
+        .icon-btn.del:hover   { border-color: var(--danger); color: var(--danger); }
+
+        /* ── MATRIX ── */
+        .matrix-wrap { width: 100%; overflow-x: auto; border-radius: 12px; border: 1px solid var(--border); background: var(--bg); margin-bottom: 1.5rem; }
+        .matrix-table { width: 100%; border-collapse: collapse; font-size: .8rem; }
+        .matrix-table th, .matrix-table td { padding: .75rem .6rem; border: 1px solid var(--border); text-align: center; }
+        .matrix-table th { background: var(--surface); font-weight: 600; white-space: nowrap; }
+        .matrix-table th:first-child, .matrix-table td:first-child { position: sticky; left: 0; background: var(--surface); text-align: left; z-index: 5; padding-left: 1rem; font-weight: 600; }
+        .matrix-table td:first-child { background: var(--card); }
+        .matrix-checkbox { width: 16px; height: 16px; accent-color: var(--success); cursor: pointer; }
+
+        /* ── TOAST ── */
+        .toast {
+            position: fixed; bottom: 2rem; right: 2rem;
+            background: var(--card); border-radius: 10px; padding: 1rem 1.5rem;
+            display: flex; align-items: center; gap: 10px;
+            box-shadow: 0 10px 30px rgba(0,0,0,.5);
+            transform: translateX(120%); transition: transform .3s cubic-bezier(.16,1,.3,1);
+            z-index: 999; max-width: 340px;
+        }
+        .toast.show { transform: translateX(0); }
+        .toast.ok   { border-left: 4px solid var(--success); }
+        .toast.err  { border-left: 4px solid var(--danger); }
+        .toast-icon { font-size: 1.2rem; }
+        .toast-msg  { font-size: .875rem; font-weight: 500; }
+
+        /* ── MODAL ── */
+        .modal { position: fixed; inset: 0; background: rgba(0,0,0,.7); display: none; align-items: center; justify-content: center; z-index: 500; }
+        .modal.show { display: flex; }
+        .modal-box { background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 2rem; width: 90%; max-width: 460px; box-shadow: 0 20px 40px rgba(0,0,0,.6); }
+        .modal-box h3 { font-size: 1.1rem; margin-bottom: 1.2rem; }
+        .modal-box input { width: 100%; padding: .8rem 1rem; border-radius: 10px; border: 1px solid var(--border); background: var(--bg); color: #fff; font-size: .9rem; font-family: inherit; outline: none; margin-bottom: 1.5rem; }
+        .modal-box input:focus { border-color: var(--accent); }
+        .modal-actions { display: flex; justify-content: flex-end; gap: .75rem; }
+    </style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav class="topnav">
+    <a href="/" class="brand">🏥 SEIC &amp; IA</a>
+    <div class="nav-links">
+        <a href="/aereo/">✈️ Predictor Aéreo</a>
+        <a href="/enfermedad/diagnosticar/">🩺 Diagnosticar</a>
+        <a href="/enfermedad/configurar/" class="active">⚙️ Configurar Sistema</a>
+        <a href="/tb_detector/">🫁 TBC (CNN)</a>
+        <a href="/tb_detector/arbol">🌳 TBC (Árbol)</a>
+        <a href="/titanic_ad/">🚢 Titanic AD</a>
+    </div>
+</nav>
+
+<main>
+    <h1>⚙️ Configurar Sistema Experto</h1>
+    <p class="subtitle">Administra el catálogo de síntomas, las patologías y la matriz de conocimiento que alimenta el motor de inferencia Prolog.</p>
+
+    <!-- TABS -->
+    <div class="tabs">
+        <button class="tab-btn active" onclick="switchTab('sintomas', this)">🧬 Síntomas</button>
+        <button class="tab-btn" onclick="switchTab('enfermedades', this)">🦠 Enfermedades</button>
+        <button class="tab-btn" onclick="switchTab('matriz', this)">📊 Matriz de Conocimiento</button>
+    </div>
+
+    <!-- ── TAB: SÍNTOMAS ────────────────────────────────────────── -->
+    <div class="tab-panel active" id="tab-sintomas">
+        <div class="card">
+            <div class="card-title">Catálogo de Síntomas</div>
+            <div class="card-desc">Haz clic en ✏️ para editar o en 🗑️ para eliminar un síntoma del catálogo.</div>
+            <div class="sintomas-list" id="sintomas-list">
+                <div style="color:var(--muted); font-size:.9rem;">Cargando…</div>
+            </div>
+            <div class="input-row">
+                <input type="text" id="new-sintoma" placeholder="Nuevo síntoma (ej: Dolor de cabeza agudo)">
+                <button class="btn btn-green" onclick="addSintoma()">＋ Agregar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ── TAB: ENFERMEDADES ─────────────────────────────────────── -->
+    <div class="tab-panel" id="tab-enfermedades">
+        <div class="card">
+            <div class="card-title">Catálogo de Enfermedades / Patologías</div>
+            <div class="card-desc">Agrega nuevas patologías al sistema. Luego asóciala a síntomas en la pestaña Matriz.</div>
+            <div class="sintomas-list" id="enfermedades-list">
+                <div style="color:var(--muted); font-size:.9rem;">Cargando…</div>
+            </div>
+            <div class="input-row">
+                <input type="text" id="new-enfermedad" placeholder="Nueva patología (ej: MALARIA)">
+                <button class="btn btn-green" onclick="addEnfermedad()">＋ Agregar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ── TAB: MATRIZ ───────────────────────────────────────────── -->
+    <div class="tab-panel" id="tab-matriz">
+        <div class="card" style="padding-bottom:1.25rem;">
+            <div class="card-title">Matriz de Conocimiento Prolog</div>
+            <div class="card-desc">Marca los síntomas (columnas) que deben coexistir para inferir cada patología (filas). Guarda para regenerar el motor de inferencia.</div>
+
+            <div class="matrix-wrap">
+                <table class="matrix-table" id="matrix-table">
+                    <tr><td colspan="2" style="padding:2rem; text-align:center; color:var(--muted);">Cargando matriz…</td></tr>
+                </table>
+            </div>
+
+            <div style="display:flex; justify-content:flex-end;">
+                <button class="btn btn-blue" id="btn-save-matrix" onclick="saveMatrix()" style="padding:.85rem 2rem; font-size:1rem;">
+                    💾 Guardar y Regenerar Reglas Prolog
+                </button>
+            </div>
+        </div>
+    </div>
+</main>
+
+<!-- TOAST -->
+<div class="toast" id="toast">
+    <span class="toast-icon" id="toast-icon">✓</span>
+    <span class="toast-msg"  id="toast-msg">OK</span>
+</div>
+
+<!-- MODAL EDITAR SÍNTOMA -->
+<div class="modal" id="modal-edit">
+    <div class="modal-box">
+        <h3>✏️ Editar Síntoma</h3>
+        <input type="text" id="modal-input" placeholder="Descripción del síntoma">
+        <div class="modal-actions">
+            <button class="btn btn-ghost" onclick="closeModal()">Cancelar</button>
+            <button class="btn btn-amber" onclick="saveEdit()">Guardar</button>
+        </div>
+    </div>
+</div>
+
+<script>
+// ── Utilidades ────────────────────────────────────────────────────────────────
+function toast(msg, ok = true) {
+    const el   = document.getElementById('toast');
+    const icon = document.getElementById('toast-icon');
+    const msgEl = document.getElementById('toast-msg');
+    el.className  = 'toast ' + (ok ? 'ok' : 'err');
+    icon.textContent = ok ? '✓' : '✗';
+    msgEl.textContent = msg;
+    el.classList.add('show');
+    setTimeout(() => el.classList.remove('show'), 3500);
+}
+
+function switchTab(name, btn) {
+    document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.getElementById('tab-' + name).classList.add('active');
+    btn.classList.add('active');
+    if (name === 'matriz') loadMatriz();
+}
+
+// ── MODAL ──────────────────────────────────────────────────────────────────────
+let editId = null;
+function openEdit(id, text) {
+    editId = id;
+    document.getElementById('modal-input').value = text;
+    document.getElementById('modal-edit').classList.add('show');
+}
+function closeModal() {
+    document.getElementById('modal-edit').classList.remove('show');
+    editId = null;
+}
+async function saveEdit() {
+    if (!editId) return;
+    const text = document.getElementById('modal-input').value.trim();
+    if (!text) return;
+    const res  = await fetch(`/enfermedad/configurar/sintomas/${editId}`, {
+        method: 'PUT', headers: {'Content-Type':'application/json'},
+        body: JSON.stringify({sintoma: text})
+    });
+    const data = await res.json();
+    if (data.status === 'success') { toast('Síntoma actualizado.'); closeModal(); loadSintomas(); }
+    else toast(data.message, false);
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// SÍNTOMAS
+// ─────────────────────────────────────────────────────────────────────────────
+async function loadSintomas() {
+    const list = document.getElementById('sintomas-list');
+    try {
+        const res  = await fetch('/enfermedad/configurar/sintomas');
+        const data = await res.json();
+        list.innerHTML = '';
+        if (!data.sintomas.length) {
+            list.innerHTML = '<div style="color:var(--muted)">Sin síntomas registrados.</div>';
+            return;
+        }
+        data.sintomas.forEach(s => {
+            const div = document.createElement('div');
+            div.className = 'sintoma-item';
+            div.innerHTML = `
+                <span class="sintoma-id">S${s.idsintoma}</span>
+                <span class="sintoma-name">${s.sintoma}</span>
+                <div class="item-actions">
+                    <button class="icon-btn edit" title="Editar" onclick="openEdit(${s.idsintoma}, ${JSON.stringify(s.sintoma)})">✏️</button>
+                    <button class="icon-btn del"  title="Eliminar" onclick="deleteSintoma(${s.idsintoma}, ${JSON.stringify(s.sintoma)})">🗑️</button>
+                </div>
+            `;
+            list.appendChild(div);
+        });
+    } catch { list.innerHTML = '<div style="color:var(--danger)">Error de conexión.</div>'; }
+}
+
+async function addSintoma() {
+    const input = document.getElementById('new-sintoma');
+    const text  = input.value.trim();
+    if (!text) return;
+    const res  = await fetch('/enfermedad/configurar/sintomas', {
+        method: 'POST', headers: {'Content-Type':'application/json'},
+        body: JSON.stringify({sintoma: text})
+    });
+    const data = await res.json();
+    if (data.status === 'success') { toast('Síntoma agregado y reglas regeneradas.'); input.value = ''; loadSintomas(); }
+    else toast(data.message, false);
+}
+
+async function deleteSintoma(id, name) {
+    if (!confirm(`¿Eliminar el síntoma "${name}"?\nSe eliminará también de la matriz.`)) return;
+    const res  = await fetch(`/enfermedad/configurar/sintomas/${id}`, { method: 'DELETE' });
+    const data = await res.json();
+    if (data.status === 'success') { toast('Síntoma eliminado.'); loadSintomas(); }
+    else toast(data.message, false);
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// ENFERMEDADES
+// ─────────────────────────────────────────────────────────────────────────────
+async function loadEnfermedades() {
+    const list = document.getElementById('enfermedades-list');
+    try {
+        const res  = await fetch('/enfermedad/configurar/enfermedades');
+        const data = await res.json();
+        list.innerHTML = '';
+        if (!data.enfermedades.length) {
+            list.innerHTML = '<div style="color:var(--muted)">Sin enfermedades registradas.</div>';
+            return;
+        }
+        data.enfermedades.forEach(e => {
+            const div = document.createElement('div');
+            div.className = 'sintoma-item';
+            div.innerHTML = `
+                <span class="sintoma-id">E${e.idenfermedad}</span>
+                <span class="sintoma-name">${e.nombre}</span>
+                <div class="item-actions">
+                    <button class="icon-btn del" title="Eliminar" onclick="deleteEnfermedad(${e.idenfermedad}, ${JSON.stringify(e.nombre)})">🗑️</button>
+                </div>
+            `;
+            list.appendChild(div);
+        });
+    } catch { list.innerHTML = '<div style="color:var(--danger)">Error de conexión.</div>'; }
+}
+
+async function addEnfermedad() {
+    const input = document.getElementById('new-enfermedad');
+    const text  = input.value.trim();
+    if (!text) return;
+    const res  = await fetch('/enfermedad/configurar/enfermedades', {
+        method: 'POST', headers: {'Content-Type':'application/json'},
+        body: JSON.stringify({nombre: text})
+    });
+    const data = await res.json();
+    if (data.status === 'success') { toast('Patología agregada.'); input.value = ''; loadEnfermedades(); }
+    else toast(data.message, false);
+}
+
+async function deleteEnfermedad(id, name) {
+    if (!confirm(`¿Eliminar la patología "${name}"?`)) return;
+    const res  = await fetch(`/enfermedad/configurar/enfermedades/${id}`, { method: 'DELETE' });
+    const data = await res.json();
+    if (data.status === 'success') { toast('Patología eliminada.'); loadEnfermedades(); }
+    else toast(data.message, false);
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// MATRIZ
+// ─────────────────────────────────────────────────────────────────────────────
+async function loadMatriz() {
+    const table = document.getElementById('matrix-table');
+    try {
+        const res  = await fetch('/enfermedad/configurar/matriz');
+        const data = await res.json();
+        table.innerHTML = '';
+
+        const { sintomas, enfermedades, mapeos } = data;
+        const mapSet = new Set(mapeos.map(m => `${m.idenfermedad}-${m.idsintoma}`));
+
+        if (!enfermedades.length || !sintomas.length) {
+            table.innerHTML = '<tr><td style="padding:2rem;text-align:center;color:var(--muted)">Agrega enfermedades y síntomas primero.</td></tr>';
+            return;
+        }
+
+        // Cabecera
+        const hRow = document.createElement('tr');
+        const thCorner = document.createElement('th');
+        thCorner.textContent = 'Patología \\ Síntoma';
+        hRow.appendChild(thCorner);
+        sintomas.forEach(s => {
+            const th = document.createElement('th');
+            th.textContent = `S${s.idsintoma}`;
+            th.title = s.sintoma;
+            hRow.appendChild(th);
+        });
+        table.appendChild(hRow);
+
+        // Filas
+        enfermedades.forEach(enf => {
+            const row = document.createElement('tr');
+            const tdName = document.createElement('td');
+            tdName.innerHTML = `<b>${enf.nombre}</b>`;
+            row.appendChild(tdName);
+            sintomas.forEach(sin => {
+                const td = document.createElement('td');
+                const cb = document.createElement('input');
+                cb.type = 'checkbox';
+                cb.className = 'matrix-checkbox';
+                cb.dataset.e = enf.idenfermedad;
+                cb.dataset.s = sin.idsintoma;
+                cb.checked   = mapSet.has(`${enf.idenfermedad}-${sin.idsintoma}`);
+                td.appendChild(cb);
+                row.appendChild(td);
+            });
+            table.appendChild(row);
+        });
+    } catch { table.innerHTML = '<tr><td style="color:var(--danger);padding:1rem">Error de conexión.</td></tr>'; }
+}
+
+async function saveMatrix() {
+    const checked = [...document.querySelectorAll('.matrix-checkbox:checked')];
+    const mapeos  = checked.map(cb => ({ idenfermedad: parseInt(cb.dataset.e), idsintoma: parseInt(cb.dataset.s) }));
+    const btn = document.getElementById('btn-save-matrix');
+    btn.disabled = true;
+    try {
+        const res  = await fetch('/enfermedad/configurar/matriz', {
+            method: 'POST', headers: {'Content-Type':'application/json'},
+            body: JSON.stringify({mapeos})
+        });
+        const data = await res.json();
+        if (data.status === 'success') toast('✅ Matriz guardada y reglas Prolog regeneradas.');
+        else toast(data.message, false);
+    } catch { toast('Error de conexión.', false); }
+    finally  { btn.disabled = false; }
+}
+
+// ── Inicialización ────────────────────────────────────────────────────────────
+loadSintomas();
+loadEnfermedades();
+</script>
+</body>
+</html>
